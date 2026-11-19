@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio & Admin Dashboard - SMK PPLG Developer</title>
@@ -602,11 +603,11 @@
                 <form onsubmit="handleAdminLogin(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Username</label>
-                        <input type="text" id="admin-user" required value="admin" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <input type="text" id="admin-user" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Password</label>
-                        <input type="password" id="admin-pass" required value="admin123" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <input type="password" id="admin-pass" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
                     </div>
                     <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-xl shadow-lg transition-all">
                         Login Dashboard
@@ -724,35 +725,67 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <form action="{{ route('project.store') }}" method="POST" class="space-y-4">
-    @csrf
-    <input type="hidden" id="pf-id">
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nama Proyek</label>
-            <!-- Pastikan atribut name="..." sesuai dengan kolom database -->
-            <input type="text" name="title" id="pf-name" required class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
-        </div>
-        <div>
-            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Kategori / Teknologi</label>
-            <select name="technology" id="pf-category" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
-                <option value="Laravel">Laravel</option>
-                <option value="JavaScript">JavaScript</option>
-                <option value="PHP">PHP</option>
-            </select>
-        </div>
-    </div>
-    <div>
-        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Deskripsi Proyek</label>
-        <textarea name="description" id="pf-desc" rows="2" required class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></textarea>
-    </div>
-    
-    <!-- Tombol Submit -->
-    <div class="pt-4 flex justify-end space-x-3">
-        <button type="button" onclick="closeProjectFormModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm font-medium">Batal</button>
-        <button type="submit" class="px-6 py-2 bg-brand-600 text-white rounded-xl text-sm font-medium">Simpan Permanen ke Database</button>
-    </div>
-</form>
+            <form onsubmit="handleProjectFormSubmit(event)" class="space-y-4">
+                <input type="hidden" id="pf-id">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nama Proyek</label>
+                        <input type="text" id="pf-name" required class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Kategori / Teknologi</label>
+                        <select id="pf-category" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                            <option value="Laravel">Laravel</option>
+                            <option value="JavaScript">JavaScript</option>
+                            <option value="PHP">PHP</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">URL Gambar</label>
+                    <input type="url" id="pf-img" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Deskripsi Proyek</label>
+                    <textarea id="pf-desc" rows="2" required class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></textarea>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Masalah</label>
+                        <textarea id="pf-problem" rows="2" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Tujuan</label>
+                        <textarea id="pf-goal" rows="2" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Peran</label>
+                        <input type="text" id="pf-role" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Fitur</label>
+                        <input type="text" id="pf-features" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Feedback</label>
+                    <input type="text" id="pf-feedback" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Link Demo</label>
+                        <input type="url" id="pf-demo" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Link GitHub</label>
+                        <input type="url" id="pf-github" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                    </div>
+                </div>
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeProjectFormModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm font-medium">Batal</button>
+                    <button type="submit" class="px-6 py-2 bg-brand-600 text-white rounded-xl text-sm font-medium">Simpan Permanen ke Database</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -788,82 +821,27 @@
 
     <!-- JavaScript Application Logic -->
     <script>
-        // Initial Data Store
-        let portfolioData = {
-            profile: {
-                name: "Atar Pratama",
-                classInfo: "XII PPLG (Pengembangan Perangkat Lunak dan Gim)",
-                bio: "Seorang Software Engineering Student yang bersemangat dalam membangun web aplikasi interaktif, sistem backend yang andal, serta eksplorasi teknologi modern.",
-                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600"
-            },
-            projects: [
-                {
-                    id: 1,
-                    name: "Sistem Manajemen Inventaris Sekolah",
-                    category: "Laravel",
-                    image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=600",
-                    description: "Aplikasi berbasis web untuk mencatat inventaris barang laboratorium komputer dan perpustakaan sekolah secara real-time.",
-                    problem: "Pencatatan manual menggunakan buku sering mengakibatkan selisih data dan hilangnya riwayat peminjaman.",
-                    goal: "Mendigitalisasi proses inventaris barang dengan laporan otomatis berformat PDF dan Excel.",
-                    role: "Full-Stack Laravel Developer",
-                    features: "Autentikasi Multi-Level, CRUD Barang, Riwayat Peminjaman, Export Laporan",
-                    feedback: "Sangat membantu pengelola lab dalam mendata inventaris dengan cepat.",
-                    demo: "https://example.com",
-                    github: "https://github.com"
+        // Data comes from the database (rendered by the server)
+        let portfolioData = @json($data);
+        const IS_ADMIN = portfolioData.isAdmin;
+
+        async function api(method, url, body) {
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
-                {
-                    id: 2,
-                    name: "Aplikasi Kasir Kantin Digital (POS)",
-                    category: "JavaScript",
-                    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600",
-                    description: "Aplikasi Point of Sale (POS) interaktif untuk pencatatan transaksi pesanan kantin sekolah berbasis Single Page Application.",
-                    problem: "Antrean panjang saat jam istirahat akibat lambatnya proses kalkulasi manual pesanan makanan.",
-                    goal: "Mempercepat transaksi dengan antarmuka kasir berbasis sentuhan dan cetak struk virtual.",
-                    role: "Frontend & UI/UX Developer",
-                    features: "Keranjang Belanja Dinamis, Kalkulasi Total, Riwayat Transaksi LocalStorage",
-                    feedback: "Proses transaksi jadi lebih cepat dan terhindar dari salah hitung.",
-                    demo: "https://example.com",
-                    github: "https://github.com"
-                },
-                {
-                    id: 3,
-                    name: "Portal Berita & Artikel PPLG",
-                    category: "PHP",
-                    image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=600",
-                    description: "Website portal berita interaktif bagi siswa PPLG untuk membagikan tutorial, catatan ngoding, dan dokumentasi kegiatan.",
-                    problem: "Kurangnya wadah publikasi karya tulis teknis antar siswa di lingkungan sekolah.",
-                    goal: "Menyediakan platform blogging internal yang ringan, cepat, dan mudah diakses.",
-                    role: "Backend Developer",
-                    features: "Manajemen Artikel CRUD, Komentar Pengunjung, Pencarian Artikel",
-                    feedback: "Siswa jadi lebih aktif menulis dan mendokumentasikan kode.",
-                    demo: "https://example.com",
-                    github: "https://github.com"
-                }
-            ],
-            certificates: [
-                {
-                    id: 1,
-                    title: "Juara 1 Lomba Web Design Antar Pelajar",
-                    issuer: "Dinas Pendidikan Kota",
-                    image: "https://images.unsplash.com/photo-1567427017947-545c5f2d16ad?auto=format&fit=crop&q=80&w=600"
-                },
-                {
-                    id: 2,
-                    title: "Sertifikasi Kompetensi Keahlian PPLG",
-                    issuer: "BNSP & SMK Negeri 1",
-                    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=600"
-                },
-                {
-                    id: 3,
-                    title: "Pelatihan Dasar Laravel & Database SQL",
-                    issuer: "Dicoding Indonesia",
-                    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=600"
-                }
-            ],
-            messages: [
-                { name: "Bpk. Ahmad Fauzi", email: "fauzi@school.edu", text: "Portfolio yang sangat rapi dan informatif!", date: "17 Mei 2026" }
-            ]
-        };
+                body: body ? JSON.stringify(body) : undefined
+            });
+            if (!res.ok) {
+                let msg = 'Gagal menyimpan (' + res.status + ')';
+                try { const j = await res.json(); msg = j.message || msg; } catch (e) {}
+                throw new Error(msg);
+            }
+            return res.json();
+        }
 
         // Initialize application on load
         window.onload = function() {
@@ -873,7 +851,17 @@
             renderAdminMessages();
             renderAdminProjectsTable();
             renderAdminCertificatesGrid();
+            if (IS_ADMIN) showAdminPanel();
         };
+
+        async function showAdminPanel() {
+            document.getElementById('admin-login-view').classList.add('hidden');
+            document.getElementById('admin-panel-view').classList.remove('hidden');
+            try {
+                portfolioData.messages = await api('GET', '/admin/messages');
+                renderAdminMessages();
+            } catch (e) {}
+        }
 
         // Tab Switching Logic
         function switchTab(tabId) {
@@ -1027,19 +1015,18 @@
         }
 
         // Contact Form Message Submit
-        function handleMessageSubmit(e) {
+        async function handleMessageSubmit(e) {
             e.preventDefault();
-            const name = document.getElementById('msg-name').value;
-            const email = document.getElementById('msg-email').value;
-            const text = document.getElementById('msg-text').value;
-
-            portfolioData.messages.unshift({
-                name, email, text, date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-            });
-
-            showToast("Pesan & kesan berhasil dikirim ke Admin!");
-            e.target.reset();
-            renderAdminMessages();
+            const form = e.target;
+            try {
+                await api('POST', '/messages', {
+                    name: document.getElementById('msg-name').value,
+                    email: document.getElementById('msg-email').value,
+                    text: document.getElementById('msg-text').value
+                });
+                showToast("Pesan & kesan berhasil dikirim ke Admin!");
+                form.reset();
+            } catch (err) { showToast(err.message); }
         }
 
         // Toast Notification Helper
@@ -1063,21 +1050,23 @@
             document.getElementById('admin-modal').classList.add('hidden');
         }
 
-        function handleAdminLogin(e) {
+        async function handleAdminLogin(e) {
             e.preventDefault();
-            const u = document.getElementById('admin-user').value;
-            const p = document.getElementById('admin-pass').value;
-
-            if (u === 'admin' && p === 'admin123') {
+            try {
+                const r = await api('POST', '/admin/login', {
+                    username: document.getElementById('admin-user').value,
+                    password: document.getElementById('admin-pass').value
+                });
+                portfolioData.messages = r.messages;
+                renderAdminMessages();
                 document.getElementById('admin-login-view').classList.add('hidden');
                 document.getElementById('admin-panel-view').classList.remove('hidden');
                 showToast("Login Admin Berhasil!");
-            } else {
-                showToast("Username atau Password salah!");
-            }
+            } catch (err) { showToast(err.message); }
         }
 
-        function adminLogout() {
+        async function adminLogout() {
+            try { await api('POST', '/admin/logout'); } catch (e) {}
             document.getElementById('admin-panel-view').classList.add('hidden');
             document.getElementById('admin-login-view').classList.remove('hidden');
             showToast("Berhasil Logout Admin.");
@@ -1149,11 +1138,10 @@
             document.getElementById('project-form-modal').classList.add('hidden');
         }
 
-        function handleProjectFormSubmit(e) {
+        async function handleProjectFormSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('pf-id').value;
-            const projectObj = {
-                id: id ? parseInt(id) : Date.now(),
+            const payload = {
                 name: document.getElementById('pf-name').value,
                 category: document.getElementById('pf-category').value,
                 image: document.getElementById('pf-img').value,
@@ -1166,15 +1154,17 @@
                 demo: document.getElementById('pf-demo').value,
                 github: document.getElementById('pf-github').value
             };
-
-            if (id) {
-                const idx = portfolioData.projects.findIndex(x => x.id === parseInt(id));
-                portfolioData.projects[idx] = projectObj;
-                showToast("Proyek berhasil diperbarui!");
-            } else {
-                portfolioData.projects.unshift(projectObj);
-                showToast("Proyek baru berhasil ditambahkan!");
-            }
+            try {
+                if (id) {
+                    const saved = await api('PUT', '/admin/projects/' + id, payload);
+                    const idx = portfolioData.projects.findIndex(x => x.id === parseInt(id));
+                    portfolioData.projects[idx] = saved;
+                    showToast("Proyek berhasil diperbarui!");
+                } else {
+                    portfolioData.projects.unshift(await api('POST', '/admin/projects', payload));
+                    showToast("Proyek baru berhasil ditambahkan!");
+                }
+            } catch (err) { showToast(err.message); return; }
 
             closeProjectFormModal();
             renderProjects();
@@ -1185,23 +1175,26 @@
             openProjectFormModal(id);
         }
 
-        function deleteProject(id) {
-            if (confirm("Apakah Anda yakin ingin menghapus proyek ini?")) {
-                portfolioData.projects = portfolioData.projects.filter(p => p.id !== id);
-                renderProjects();
-                renderAdminProjectsTable();
-                showToast("Proyek berhasil dihapus.");
-            }
+        async function deleteProject(id) {
+            if (!confirm("Apakah Anda yakin ingin menghapus proyek ini?")) return;
+            try { await api('DELETE', '/admin/projects/' + id); } catch (err) { showToast(err.message); return; }
+            portfolioData.projects = portfolioData.projects.filter(p => p.id !== id);
+            renderProjects();
+            renderAdminProjectsTable();
+            showToast("Proyek berhasil dihapus.");
         }
 
         // Profile Update Handler
-        function handleProfileUpdate(e) {
+        async function handleProfileUpdate(e) {
             e.preventDefault();
-            portfolioData.profile.name = document.getElementById('admin-edit-name').value;
-            portfolioData.profile.classInfo = document.getElementById('admin-edit-class').value;
-            portfolioData.profile.bio = document.getElementById('admin-edit-bio').value;
-            portfolioData.profile.avatar = document.getElementById('admin-edit-avatar').value;
-
+            try {
+                portfolioData.profile = await api('PUT', '/admin/profile', {
+                    name: document.getElementById('admin-edit-name').value,
+                    classInfo: document.getElementById('admin-edit-class').value,
+                    bio: document.getElementById('admin-edit-bio').value,
+                    avatar: document.getElementById('admin-edit-avatar').value
+                });
+            } catch (err) { showToast(err.message); return; }
             renderProfile();
             showToast("Informasi profil berhasil diperbarui!");
         }
@@ -1233,22 +1226,23 @@
             document.getElementById('certificate-form-modal').classList.add('hidden');
         }
 
-        function handleCertificateFormSubmit(e) {
+        async function handleCertificateFormSubmit(e) {
             e.preventDefault();
-            const certObj = {
-                id: Date.now(),
-                title: document.getElementById('cf-title').value,
-                issuer: document.getElementById('cf-issuer').value,
-                image: document.getElementById('cf-img').value
-            };
-            portfolioData.certificates.unshift(certObj);
+            try {
+                portfolioData.certificates.unshift(await api('POST', '/admin/certificates', {
+                    title: document.getElementById('cf-title').value,
+                    issuer: document.getElementById('cf-issuer').value,
+                    image: document.getElementById('cf-img').value
+                }));
+            } catch (err) { showToast(err.message); return; }
             closeCertificateFormModal();
             renderCertificates();
             renderAdminCertificatesGrid();
             showToast("Sertifikat baru ditambahkan!");
         }
 
-        function deleteCertificate(id) {
+        async function deleteCertificate(id) {
+            try { await api('DELETE', '/admin/certificates/' + id); } catch (err) { showToast(err.message); return; }
             portfolioData.certificates = portfolioData.certificates.filter(c => c.id !== id);
             renderCertificates();
             renderAdminCertificatesGrid();
